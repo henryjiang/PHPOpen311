@@ -31,7 +31,7 @@ include('classes/PHPOpen311.php');
 
 define("BASE_URL", "");
 define("API_KEY", "");
-define("CITY_ID", "");
+define("CITY_ID", ""); 
 
 
 try {
