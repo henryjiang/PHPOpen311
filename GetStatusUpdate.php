@@ -29,9 +29,9 @@
 // Include the Open 311 classes.
 include('classes/PHPOpen311.php');
 
-define("BASE_URL", "https://open311.sfgov.org/dev/v2/requests.xml");
-define("API_KEY", "DT");
-define("CITY_ID", "sfgov.org");
+define("BASE_URL", "");
+define("API_KEY", "");
+define("CITY_ID", "");
 
 // Service request ID.
 $service_request_id = 296359;
