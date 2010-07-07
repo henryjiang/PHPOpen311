@@ -29,15 +29,16 @@
 // Include the Open 311 classes.
 include('classes/PHPOpen311.php');
 
-define("BASE_URL", "");
-define("API_KEY", "");
-define("CITY_ID", "");
+define("BASE_URL", "https://open311.sfgov.org/dev/v2/requests.xml");
+define("API_KEY", "DT");
+define("CITY_ID", "sfgov.org");
 
 // Service request information.
 $service_code = '021';
 $lat = '37.76524078';
 $lon = '-122.4212043';
 $address_string = '123 Some Street, San Francisco, CA 94114';
+$address_id = '';
 $customer_email = 'john_q_public@gmail.com';
 $device_id = 'se4H173nxaQsddl';
 $account_id = '1234567890';
@@ -53,18 +54,19 @@ try {
 	$open311 = new Open311(BASE_URL, API_KEY, CITY_ID);
 	
 	// Create a new 311 Service request.
-	$open311->createRequest($service_code, $lat, $lon, $address_string, $customer_email, $device_id, 
+	$open311->createRequest($service_code, $lat, $lon, $address_string, $address_id, $customer_email, $device_id, 
 				$account_id, $first_name, $last_name, $phone_number, $description, $media_url);	
 							
 	$createRequestXML = new SimpleXMLElement($open311->getOutput());
-	
+
 	// Check to see if an error code and message were returned.
-	if(strlen($createRequestXML->Open311Error->errorCode) > 0) {
-		throw new create_requestException("API Error message returned: ".$createRequestXML->Open311Error->errorDescription);
+	if(strlen($createRequestXML->open311_error->errorCode) > 0) {
+		throw new create_requestException("API Error message returned: ".$createRequestXML->open311_error->errorDescription);
 	}
 	
 	// Display the ID of the service request.
-	echo "Service Request ID: ".$createRequestXML->Open311Create->service_request_id;
+	//echo "Service Request ID: ".$createRequestXML->service_request->service_request_id;
+    echo "Service Request ID: ".$createRequestXML->service_request_id;
 }
 
 catch (create_requestException $ex) {

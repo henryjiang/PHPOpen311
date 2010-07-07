@@ -100,11 +100,12 @@ class Open311 extends APIBaseClass {
 	private $api_url;
 	private $method_name;
 	private $api_key;
-	private $city_id;
+	private $jurisdiction_id;
 	private $service_code;
 	private $lat;
 	private $lon;
 	private $address_string;
+    private $address_id;
 	private $customer_email;
 	private $device_id;
 	private $account_id;
@@ -114,6 +115,9 @@ class Open311 extends APIBaseClass {
 	private $description;
 	private $media_url;
 	private $service_request_id;
+    private $start_date;
+    private $end_date;
+    private $status;
 	
 	/**
 	 * Open311 Class Constructor.
@@ -124,7 +128,7 @@ class Open311 extends APIBaseClass {
 	 */
 	public function __construct($base_url, $api_key, $city_id) {
 		$this->api_key = $api_key;
-		$this->city_id = $city_id;
+		$this->jurisdiction_id = $city_id;
 		parent::__construct($base_url);
 	}
 	
@@ -135,7 +139,7 @@ class Open311 extends APIBaseClass {
 	public function selectService(){
 		
 		// Set URL for API method.
-		$this->method_name = 'service_list';
+		$this->method_name = 'services';
 		
 		// Make the HTTP request to the API.
 		$this->makeAPIRequest();
@@ -147,7 +151,8 @@ class Open311 extends APIBaseClass {
 	 * @param string $service_code
 	 * @param string $lat
 	 * @param string $lon
-	 * @param string $address_string 
+	 * @param string $address_string
+     * @param string $address_id
 	 * @param string $customer_email
 	 * @param string $device_id 
 	 * @param string $account_id 
@@ -158,13 +163,14 @@ class Open311 extends APIBaseClass {
 	 * @param string $media_url
 	 * @return string
 	 */
-	public function createRequest($service_code, $lat=NULL, $lon=NULL, $address_string=NULL, $customer_email=NULL, $device_id=NULL, 
+	public function createRequest($service_code, $lat=NULL, $lon=NULL, $address_string=NULL, $address_id=NULL, $customer_email=NULL, $device_id=NULL,
 				      			  $account_id=NULL, $first_name=NULL, $last_name=NULL, $phone_number=NULL, $description=NULL, $media_url=NULL) {
 		
 		$this->service_code = $service_code;
 		$this->lat = $lat;
 		$this->lon = $lon;
 		$this->address_string = urlencode($address_string);
+        $this->address_id = $address_id;
 		$this->customer_email = $customer_email;
 		$this->device_id = $device_id;
 		$this->account_id = $account_id;
@@ -178,9 +184,8 @@ class Open311 extends APIBaseClass {
 			throw new create_requestException('Must submit lat/lon or address string with create service request.');
 		}
 		
-		// Set URL for API method.
-		$this->method_name = 'create_request';
-		
+        //V2 uses different method name
+        $this->method_name = 'create_request';
 		// Make the HTTP request to the API.
 		$this->makeAPIRequest();
 	}
@@ -188,11 +193,19 @@ class Open311 extends APIBaseClass {
 	/**
 	 * Get the status of a specific 311 Service Request.
 	 * @param int $service_request_id
+     * @param string $service_code
+     * @param string $start_date
+     * @param string $end_date
+     * @param string status
 	 * @return string
 	 */
-	public function statusUpdate($service_request_id) {
+	public function statusUpdate($service_request_id, $service_code = NULL, $start_date=NULL, $end_date=NULL,$status=NULL) {
 		
 		$this->service_request_id = $service_request_id;
+        $this->service_code = $service_code;
+        $this->start_date = $start_date;
+        $this->end_date = $end_date;
+        $this->status = $status;
 		
 		// Set URL for API method.
 		$this->method_name = 'status_update';
@@ -206,30 +219,48 @@ class Open311 extends APIBaseClass {
 	 */
 	private function makeAPIRequest() {
 		
-		$request_url = $this->base_url.$this->method_name.'?api_key='.$this->api_key.'&city_id='.$this->city_id;
+		$request_url = $this->base_url.'?jurisdiction_id='.$this->jurisdiction_id;
 		
 		switch($this->method_name) {
 			
-			case 'service_list':				
+			case 'services':
 				break;
 
 			case 'create_request':
-				$request_url .= "&service_code=$this->service_code&lat=$this->lat&lon=$this->lon";
-				$request_url .= "&address_string=$this->address_string&customer_email=$this->customer_email";
-				$request_url .= "&device_id=$this->device_id&account_id=$this->account_id&first_name=$this->first_name";
-				$request_url .= "&last_name=$this->last_name&phone_number=$this->phone_number&description=$this->description";
-				$request_url .= "&media_url=$this->media_url";
+                $post_fields = array(
+                    'api_key' => "$this->api_key",
+                    'jurisdiction_id' => "$this->jurisdiction_id",
+                    'service_code' => "$this->service_code",
+                    'lat' => "$this->lat",
+                    'lon' => "$this->lon",
+                    'address_id' => "$this->address_id",
+                    'address_string' => "$this->address_string",
+                    'email' => "$this->customer_email",
+                    'device_id' => "$this->device_id",
+                    'account_id' => "$this->account_id",
+                    'first_name' => "$this->first_name",
+                    'last_name' => "$this->last_name",
+                    'phone_number' => "$this->phone_number",
+                    'description' => "$this->description",
+                    'media_url' => "$this->media_url",
+                );
 				break;
 				
-			case 'status_update':
-				$request_url .= "&service_request_id=$this->service_request_id";
+			case 'status_update':  
+				$request_url .= "&service_request_id=$this->service_request_id&service_code=$this->service_code&start_date=$this->start_date";
+                $request_url .= "&end_date=$this->end_date&status=$this->status";
 				break;
 		}
-		
+		    
 		// Set options for all cURL requests
-		curl_setopt($this->ch, CURLOPT_URL, $request_url);
-		curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, true);	
-		
+		curl_setopt($this->ch, CURLOPT_URL, $request_url);  
+		curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($this->ch, CURLOPT_SSL_VERIFYPEER, false);
+        if(!empty($post_fields)){
+            curl_setopt($this->ch, CURLOPT_POST,true);
+            curl_setopt($this->ch, CURLOPT_POSTFIELDS,$post_fields);
+        }
+
 		// Make cURL request and get response.
 		$this->output = curl_exec($this->ch);
 		$this->info = curl_getinfo($this->ch);

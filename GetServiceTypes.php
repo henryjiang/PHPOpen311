@@ -29,9 +29,10 @@
 // Include the Open 311 classes.
 include('classes/PHPOpen311.php');
 
-define("BASE_URL", "");
-define("API_KEY", "");
-define("CITY_ID", "");
+define("BASE_URL", "https://open311.sfgov.org/dev/v2/services.xml");
+define("API_KEY", "DT");
+define("CITY_ID", "sfgov.org");
+
 
 try {
 	
@@ -43,13 +44,14 @@ try {
 	$serviceTypesXML = new SimpleXMLElement($open311->getOutput());
 	
 	// Check to see if an error code and message were returned.
-	if(strlen($serviceTypesXML->Open311Error->errorCode) > 0) {
-		throw new service_listException("API Error message returned: ".$serviceTypesXML->Open311Error->errorDescription);
+	if(strlen($serviceTypesXML->open311_error->errorCode) > 0) {
+		throw new service_listException("API Error message returned: ".$serviceTypesXML->open311_error->errorDescription);
 	}
 	
 	// Loop through each service type and write out the code, name and description.
-	foreach ($serviceTypesXML->Open311ServiceList->service as $service) {
-		echo $service['service_code'].": ".$service['service_name'].": ".$service['service_description']."<br />";
+	foreach ($serviceTypesXML->service as $service) {
+		echo $service->service_code.": ".$service->service_name.": ".$service->service_description."<br />";
+
 	}
 	
 }

@@ -29,12 +29,12 @@ try {
 	$statusUpdateXML = new SimpleXMLElement($open311->getOutput());
 	
         // Check to see if an error code and message were returned.
-	if(strlen($statusUpdateXML->Open311Error->errorCode) > 0) {
-		throw new status_updateException("API Error message returned: ".$statusUpdateXML->Open311Error->errorDescription);
+	if(strlen($statusUpdateXML->open311_error->errorCode) > 0) {
+		throw new status_updateException("API Error message returned: ".$statusUpdateXML->open311_error->errorDescription);
 	}
 	
         // Display the current status of the service request.
-	echo "Status of Service Request #sample_service_request_id: ".strtoupper($statusUpdateXML->Open311Status->status);	
+	echo "Status of Service Request #$service_request_id: ".strtoupper($statusUpdateXML->request->status);
 }
 
 catch (status_updateException $ex) {
