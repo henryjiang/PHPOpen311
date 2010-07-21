@@ -139,7 +139,7 @@ class Open311 extends APIBaseClass {
 	public function selectService(){
 		
 		// Set URL for API method.
-		$this->method_name = 'services';
+		$this->method_name = 'service_list';
 		
 		// Make the HTTP request to the API.
 		$this->makeAPIRequest();

@@ -50,7 +50,7 @@ try {
 	
 	// Loop through each service type and write out the code, name and description.
 	foreach ($serviceTypesXML->service as $service) {
-		echo $service->service_code.": ".$service->service_name.": ".$service->service_description."<br />";
+		echo $service->service_code.": ".$service->service_name.": ".$service->description."<br />";
 
 	}
 	
