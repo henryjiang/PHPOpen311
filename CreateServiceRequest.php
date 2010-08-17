@@ -74,7 +74,7 @@ catch (create_requestException $ex) {
 }
 
 catch (Exception $ex) {
-	die("Sorry, a problem occured: ".$ex->getMessage());
+	die("Sorry, an error occured: ".$ex->getMessage());
 }
 
 ?>
